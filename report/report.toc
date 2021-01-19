@@ -1,0 +1,34 @@
+\babel@toc {italian}{}
+\babel@toc {italian}{}
+\contentsline {chapter}{\numberline {1}Scelte progettuali}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Componenti}{2}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Lato server}{2}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Lato client}{2}{subsection.1.1.2}%
+\contentsline {section}{\numberline {1.2}Persistenza}{3}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Struttura database}{3}{subsection.1.2.1}%
+\contentsline {section}{\numberline {1.3}Sicurezza}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Chat}{3}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Comunicazione ip delle chat}{3}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Lato client}{4}{subsection.1.4.2}%
+\contentsline {section}{\numberline {1.5}Server timeout}{4}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Schema dell'architettura}{4}{section.1.6}%
+\contentsline {chapter}{\numberline {2}Scelte implementative}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Strutture dati}{6}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Lato server}{6}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Lato client}{6}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Porte utilizzate}{6}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Modalità di gestione dei client}{7}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Gestione dei thread}{7}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Thread safeness}{7}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Lato server}{7}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Lato client}{7}{subsection.2.5.2}%
+\contentsline {section}{\numberline {2.6}Generazione degli ip di multicast per le chat}{7}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Metodi della specifica}{8}{section.2.7}%
+\contentsline {subsection}{\numberline {2.7.1}Modifiche}{8}{subsection.2.7.1}%
+\contentsline {chapter}{\numberline {3}Formato dei messaggi}{10}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Messaggi di richiesta}{10}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Messaggi di risposta}{10}{section.3.2}%
+\contentsline {chapter}{\numberline {4}Compilazione e Avvio}{12}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Dipendenze}{12}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Run}{12}{section.4.2}%
+\contentsfinish 
