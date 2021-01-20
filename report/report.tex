@@ -46,7 +46,7 @@
 			\vspace*{5mm}
 			{\LARGE{\bf Reti di Calcolatori e Laboratorio Corso A}}\\
 			\vspace{5mm}
-			{\LARGE{\bf Relazione progetto}}\\
+			{\LARGE{\bf Relazione progetto WORTH}}\\
 		\end{center}
 		
 		\vspace{10mm}
@@ -121,7 +121,7 @@
 	Gli attributi \textit{chatIp} e \textit{members} di ogni progetto vengono salvati in 2 file distinti all'interno della directory \textit{nomeprogetto/.meta} nominati rispettivamente \textit{ip} e \textit{members}. \\
 	Le cards vengono invece salvate all'interno della directory \textit{nomeprogetto} creando un file per ogni card. \\
 	Gli utenti vengono salvati all'interno della directory \textit{db/users} creando come per le cards un file per ogni utente. \\
-	Il salvataggio di dati non primitivi come stringhe o interi viene fatto serializzando l'oggetto in un formato json e poi salvando la stringa json in un file, in particolare questo avviene per gli utenti, i membri di ogni progetto e le cards.
+	Il salvataggio di dati non primitivi come array o in generale oggetti di del sistema viene fatto serializzando l'oggetto in un formato json e poi salvando la stringa json in un file, in particolare questo avviene per gli utenti, i membri di ogni progetto e le cards.
 	
 	\section{Sicurezza}
 	È stato deciso di non mantenere le password in chiaro ne in memoria ne sul dico ma bensì al momento della registrazione viene calcolato e salvato l'hash della password inviata dal client.\\
@@ -140,14 +140,20 @@
 		\end{itemize}
 
 	Il primo serve per notificare agli utenti membri del progetto l'ip di quest'ultimo, il secondo per notificare invece sempre agli stessi la cancellazione di un progetto del quale erano membri, questo per permettere di eliminare lato client le risorse allocate per leggere la chat di quel progetto.\\
-	%todo login ip comunication
-	  \\
+	L'unico momento in cui il client viene a conoscenza degli ip dei vari progetti senza il meccanismo di callback è al login dove, se l'operazione è avvenuta con successo, vengono inviati insieme alla lista degli utenti come risposta sulla connessione TCP avviata dal client.\\
 	La scelta di utilizzare questo metodo è motivata dal fatto che la notifica di aggiunta e/o di cancellazione dei progetti è quasi istantanea e permette al client di essere sempre aggiornato su azioni di altri su progetti di cui è membro. \\
 	In più evita all'utente di avviare esplicitamente la lettura di nuovi messaggi dalle chat dei progetti di cui è membro infatti tutto questo viene fatto automaticamente nell'implementazione lato client dell'interfaccia \textbf{ClientEventInterface}.
 	
 	\subsection{Lato client}
 	\textbf{Chat} viene utilizzata per avviare un thread che in background legge e salva i messaggi che arrivano per un determinato progetto, contiene in oltre 2 metodi: uno per leggere i messaggi arrivati dall'ultima lettura e uno per inviare un messaggio in chat. \\
 	Il metodo di callback \textit{notifyProjectIp} crea un instanza Chat per ogni nuovo progetto e avvia il thread che legge i messaggi per quel progetto, il metodo \textit{notifyDeletedProject} invece termina il thread avviato per un progetto eliminato e quindi stoppa il salvataggio di nuovi messaggi.
+	
+	\subsubsection{Eliminazione di un progetto}
+	È stato scelto di permettere agli utenti di leggere la chat di un progetto anche dopo la sua eliminazione.\\
+	In particolare quando un progetto viene eliminato l'operazione viene eseguita e notificata attraverso le callback ai vari utenti membri del progetto, e quindi lato client le risorse allocate per leggere la chat vengono eliminate. Quello che non viene eliminato è l'oggetto contenente i messaggi non letti, almeno fino al momento in cui l'utente non crea o non viene aggiunto a un progetto con lo stesso nome di quello eliminato.
+	
+	\subsection{Lato server}
+	L'unica cosa che fa il server sulle chat dei vari progetti è inviare messaggi di notifica ai membri di un progetto al quale è stata fatta una modifica, come aggiunta di cards o membri, spostamento di cards e/o rimozione del progetto stesso.
 	
 	\section{Server timeout}
 	Per evitare uno spreco di risorse è stato previsto un tempo massimo di attesa del server per un input da parte dell'utente impostato a 5 minuti. \\
@@ -157,10 +163,6 @@
 	\begin{center}
 		\includegraphics[width=1\textwidth]{project-architecture}
 	\end{center}
-
-	
-	La parte superiore dello schema comprende le componenti lato client, la parte inferiore invece quelle lato server.
-	
 	
 	\chapter{Scelte implementative}
 	\section{Strutture dati}
@@ -171,9 +173,8 @@
 	\textbf{ConcurrentHashMap} è stata usata invece per rappresentare gli utenti interessati a ricevere notifiche con callback in \textbf{CallbackServer} dato che i metodi \textit{registerForEvents} e \textit{unregisterForEvents} non fanno altro che eseguire rispettivamente una \textit{put} e una \textit{remove}.
 	
 	\subsection{Lato client}
-	È stata usata la \textbf{Hashmap} solo per la lista dei thread che leggono le chat dei vari progetti con chiave il nome del progetto e come valore il Thread corrispondente, dato che viene modificata solo dai metodi \textit{notifyProjectIp} e \textit{notifyDeletedProject}. \\
-	Per la lista degli oggeti \textbf{Chat} e per la lista degli utenti è stata usata invece una \textbf{ConcurrentHashMap} in quanto vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di callback.\\
-	Per la prima hashmap come chiave viene usato il nome del progetto e come valore l'oggetto \textbf{Chat} corrispondente, per la seconda come chiave viene usato il nome dell'utente e come valore un booleano dove true equivale a utente online false il contrario.
+	È stata usata una \textbf{ConcurrentHashMap} sia per la lista degli oggeti \textbf{Chat} che per la lista degli utenti in quanto vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di callback.\\
+	Per la prima viene usato come chiave il nome del progetto e come valore l'oggetto \textbf{Chat} corrispondente, per la seconda come chiave viene usato il nome dell'utente e come valore un booleano dove true equivale a utente online false il contrario.
 	
 	\section{Porte utilizzate}
 	Per il corretto funzionamento di tutto il servizio sono state utilizzate 3 porte:
@@ -196,7 +197,7 @@
 	
 	\subsection{Lato server}
 	Utilizzando un multithreaded server, per gerantire una consistenza delle informazioni create, modificate e rimosse dai client, è stato necessario rendere l'accesso agli utenti e ai progetti, quindi anche alle card e ai membri dei quest'ultimi mutualmente esclusivo.\\
-	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che tutti vanno a modificare lo stato delle 2 classi che per la prima sono le liste degli utenti online e offline e per la seconda è la lista dei progetti. 
+	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che vanno a modificare lo stato che per la prima sono le liste degli utenti online e offline e per la seconda è la lista dei progetti. 
 	
 	\subsection{Lato client}
 	Le uniche strutture condivise sono \textit{usersList} che mantiene le coppie $<nome utente, stato>$, \textit{chats} che mantiene le coppie $<nome progetto, chat>$ e \textit{threadPool} che mantiene tutti i thread che leggono le chat dei vari progetti dell'utente.\\ 
@@ -253,8 +254,8 @@
 			\item \textit{showMembers}
 			\item \textit{sendChatMsg}
 		\end{itemize}
-	con l'aggiunta del parametro \textit{user} che corrisponde all'utente che richiede l'operazione, questo per controllare se effetivamente l'utente ha i permessi per fare quella determinata operazione che sta richiedendo e per sapere chi vuole inviare il messaggio per l'ultimo metodo.\\
-	È stato modificato ulteriormente il metodo \textit{moveCard} eliminando il parametro che corrisponde alla lista di partenza della card, dato che non dava nessuna informazione in più non reperibile direttamente dal server. Infatti la lista in cui la card si trova prima del movimento è conosciuta dal server e ovviamente prima di eseguire lo spostamento controlla se quest'ultimo è fattibile.
+	con l'aggiunta del parametro \textit{user} che corrisponde all'utente che richiede l'operazione, questo per controllare se effetivamente l'utente ha i permessi per fare quella determinata operazione che sta richiedendo e per sapere chi vuole inviare il messaggio nel caso dell'ultimo metodo.\\
+	È stato modificato ulteriormente il metodo \textit{moveCard} eliminando il parametro che corrisponde alla lista di partenza della card, dato che non dava nessuna informazione in più non reperibile direttamente dal server. Infatti la lista in cui la card si trova prima del movimento è conosciuta dal server e ovviamente viene utilizzata, prima di eseguire lo spostamento, per controllare se quest'ultimo è fattibile.
 	
 	\chapter{Formato dei messaggi}
 	Nei messaggi scambiati tra client e server viene usato il carattere \% per separare le varie informazioni, tutti i messaggi hanno il seguente formato:
@@ -326,7 +327,7 @@
 			\hline
 			1	& errori di sintassi \\
 			\hline
-			2	& errori relativo agli utenti/membri \\
+			2	& errori relativi agli utenti/membri \\
 			\hline
 			3	& errori relativi alle passwords \\
 			\hline
@@ -347,16 +348,28 @@
 	L'unica dipendenza necessaria per compilare e runnare server e i clients è maven.\\
 	L'installazione di maven varia in base al sistema operativo, per farlo correttamente si può seguire la guida del sito ufficiale andando su  \href{https://maven.apache.org/install.html}{https://maven.apache.org/install.html}.
 	
+	\subsection{Debian based}
+	Se ci si trova su un sistema basato su debian, come ubuntu, l'intallazione è più semplice, infatti basta aprire il terminale e digitare:
+	\begin{lstlisting}[language=bash]
+	sudo apt install maven
+	\end{lstlisting}
+
+	
 	\section{Run}
 	Per compilare e avviare il server posizionarsi all'interno della directory \textit{worthserver} e digitare sul terminale:
-	\begin{lstlisting}
-	$ mvn exec:java -Dexec.mainClass="com.worth.ServerMain"
+	\begin{lstlisting}[language=bash]
+	mvn compile
+	mvn exec:java -Dexec.mainClass="com.worth.ServerMain"
 	\end{lstlisting}
 	
 	Una volta avviato il server per avviare un client aprire un nuovo terminale, posizionarsi all'interno della directory \textit{worthclient} e digitare:
-	\begin{lstlisting}
-	$ mvn exec:java -Dexec.mainClass="com.worth.WorthMain"
+	\begin{lstlisting}[language=bash]
+	mvn compile
+	mvn exec:java -Dexec.mainClass="com.worth.WorthMain"
 	\end{lstlisting}
+	
+	Si consiglia di non copiare e incollare dal documento ma di scrivere a mano i comandi perché in base al lettore di pdf che si usa i caratteri copiati potrebbero essere errati e dare quindi errori di compilazione.\\
+	Una volta avviato il client per vedere la lista dei comandi disponbili digitare il comando \textit{help}.
 	
 	
 	

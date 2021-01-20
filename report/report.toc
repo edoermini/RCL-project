@@ -10,8 +10,10 @@
 \contentsline {section}{\numberline {1.4}Chat}{3}{section.1.4}%
 \contentsline {subsection}{\numberline {1.4.1}Comunicazione ip delle chat}{3}{subsection.1.4.1}%
 \contentsline {subsection}{\numberline {1.4.2}Lato client}{4}{subsection.1.4.2}%
+\contentsline {subsubsection}{Eliminazione di un progetto}{4}{section*.3}%
+\contentsline {subsection}{\numberline {1.4.3}Lato server}{4}{subsection.1.4.3}%
 \contentsline {section}{\numberline {1.5}Server timeout}{4}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Schema dell'architettura}{4}{section.1.6}%
+\contentsline {section}{\numberline {1.6}Schema dell'architettura}{5}{section.1.6}%
 \contentsline {chapter}{\numberline {2}Scelte implementative}{6}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Strutture dati}{6}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Lato server}{6}{subsection.2.1.1}%
@@ -30,5 +32,6 @@
 \contentsline {section}{\numberline {3.2}Messaggi di risposta}{10}{section.3.2}%
 \contentsline {chapter}{\numberline {4}Compilazione e Avvio}{12}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Dipendenze}{12}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Debian based}{12}{subsection.4.1.1}%
 \contentsline {section}{\numberline {4.2}Run}{12}{section.4.2}%
 \contentsfinish 
