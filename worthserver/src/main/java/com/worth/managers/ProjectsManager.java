@@ -16,7 +16,6 @@ import com.worth.rmi.callback.CallbackServer;
 
 import java.io.IOException;
 import java.net.*;
-import java.rmi.RemoteException;
 import java.util.*;
 
 public class ProjectsManager {
@@ -65,11 +64,7 @@ public class ProjectsManager {
         }
 
         // notifies to the user the project's ip
-        try {
-            this.callback.notifyProjectIp(user, p.getName(), p.getChatIp());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        this.callback.notifyProjectIp(user, p.getName(), p.getChatIp());
 
         Writer.addProject(p);
     }
@@ -112,11 +107,7 @@ public class ProjectsManager {
         this.sendMsg(user, "deleted project", p.getChatIp());
 
         // notifies to the user the project's ip
-        try {
-            this.callback.notifyDeletedProject(p.getMembers(), p.getName());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        this.callback.notifyDeletedProject(p.getMembers(), p.getName());
     }
 
     /**
@@ -304,11 +295,7 @@ public class ProjectsManager {
         p.addMember(newMember);
 
         // notifies to the new user the project's ip
-        try {
-            this.callback.notifyProjectIp(newMember, p.getName(), p.getChatIp());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        this.callback.notifyProjectIp(newMember, p.getName(), p.getChatIp());
 
         // adding project's member in filesystem
         Writer.updateMembers(p);
@@ -349,15 +336,9 @@ public class ProjectsManager {
      */
     public synchronized List<String> listProjects() {
 
-        ArrayList<String> projects = new ArrayList<>();
-
         Set<String> projectsEnum = this.projects.keySet();
 
-        for (String project : projectsEnum) {
-            projects.add(project);
-        }
-
-        return projects;
+        return new ArrayList<>(projectsEnum);
     }
 
     /**

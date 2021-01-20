@@ -78,6 +78,17 @@ public class ServerThread implements Runnable {
                     break;
                 }
 
+                // client crashed
+                if (command == null) {
+
+                    // closing safely
+                    if (userName != null) {
+                        this.users.logout(userName);
+                    }
+
+                    break;
+                }
+
                 // client quit
                 if (command.equals("quit")) {
                     break;

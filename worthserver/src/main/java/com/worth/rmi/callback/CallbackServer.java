@@ -3,6 +3,7 @@ package com.worth.rmi.callback;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,14 +49,18 @@ public class CallbackServer extends RemoteObject implements CallbackServerInterf
      * @param userName the client's username to send notification
      * @param projectName the project's name to notify
      * @param ip the project's ip to notify
-     * @throws RemoteException
      */
-    public synchronized void notifyProjectIp(String userName, String projectName, String ip) throws RemoteException {
+    public synchronized void notifyProjectIp(String userName, String projectName, String ip) {
         if (!this.subscribedClients.containsKey(userName)) {
             return;
         }
 
-        this.subscribedClients.get(userName).notifyProjectIp(projectName, ip);
+        try {
+            this.subscribedClients.get(userName).notifyProjectIp(projectName, ip);
+        } catch (RemoteException e) {
+            // client crashed or unreachable
+            this.subscribedClients.remove(userName);
+        }
     }
 
     /**
@@ -63,13 +68,17 @@ public class CallbackServer extends RemoteObject implements CallbackServerInterf
      *
      * @param users the clients usernames list
      * @param projectName the project's name to notify
-     * @throws RemoteException
      */
-    public synchronized  void notifyDeletedProject(List<String> users, String projectName) throws RemoteException {
+    public synchronized  void notifyDeletedProject(List<String> users, String projectName) {
 
         for (String user : users) {
             if (this.subscribedClients.containsKey(user)) {
-                this.subscribedClients.get(user).notifyDeletedProject(projectName);
+                try {
+                    this.subscribedClients.get(user).notifyDeletedProject(projectName);
+                } catch (RemoteException e) {
+                    // client crashed or unreachable
+                    this.subscribedClients.remove(user);
+                }
             }
         }
     }
@@ -79,12 +88,16 @@ public class CallbackServer extends RemoteObject implements CallbackServerInterf
      *
      * @param userName the user with new state
      * @param status the new state
-     * @throws RemoteException
      */
-    public synchronized void newUserStateEvent(String userName, boolean status) throws RemoteException {
+    public synchronized void newUserStateEvent(String userName, boolean status) {
 
-        for (ClientEventInterface client : this.subscribedClients.values()) {
-            client.notifyUserEvent(userName, status);
+        for (Map.Entry<String, ClientEventInterface> client : this.subscribedClients.entrySet()) {
+            try {
+                client.getValue().notifyUserEvent(userName, status);
+            } catch (RemoteException e) {
+                // client crashed or unreachable
+                this.subscribedClients.remove(client.getKey());
+            }
         }
     }
 

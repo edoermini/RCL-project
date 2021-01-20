@@ -9,7 +9,6 @@ import com.worth.exceptions.user.UserNotFoundException;
 import com.worth.io.Writer;
 import com.worth.rmi.callback.CallbackServer;
 
-import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,11 +59,8 @@ public class UsersManager {
         u.setStatus(true);
         this.onlineUsers.put(u.getUserName(), u);
 
-        try {
-            this.callback.newUserStateEvent(userName, true);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        // notifying new user state
+        this.callback.newUserStateEvent(userName, true);
     }
 
     /**
@@ -89,11 +85,8 @@ public class UsersManager {
         u.setStatus(false);
         this.offlineUsers.put(u.getUserName(), u);
 
-        try {
-            this.callback.newUserStateEvent(userName, false);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        // notifying new user state
+        this.callback.newUserStateEvent(userName, false);
     }
 
     /**
@@ -116,11 +109,8 @@ public class UsersManager {
         User u = new User(userName, password);
         this.offlineUsers.put(userName, u);
 
-        try {
-            this.callback.newUserStateEvent(userName, false);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        // notifying new user state
+        this.callback.newUserStateEvent(userName, false);
 
         // writing user into filesystem
         Writer.addUser(u);
