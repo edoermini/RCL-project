@@ -6,7 +6,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ClientEvent extends RemoteObject implements ClientEventInterface {
     private ConcurrentHashMap<String, Boolean> usersList;
@@ -41,12 +40,9 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
     public void notifyProjectIp(String projectName, String ip) throws RemoteException {
 
         Chat cr = new Chat(ip);
-        //Thread t = new Thread(cr);
-        //t.start();
 
         this.chats.put(projectName, cr);
         this.threadPool.execute(cr);
-        //this.chatThreads.put(projectName, t);
     }
 
     /**
@@ -57,18 +53,8 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
      */
     @Override
     public void notifyDeletedProject(String projectName) throws RemoteException {
-        //Thread t = this.chatThreads.get(projectName);
         Chat chat = this.chats.get(projectName);
-
         chat.stop();
-        /*
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-         */
-        //this.chatThreads.remove(projectName);
     }
 
     /**

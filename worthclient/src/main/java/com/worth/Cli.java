@@ -653,7 +653,7 @@ public class Cli {
 
                         break;
 
-                    case "readchat":
+                    case "readchat": // READ-CHAT
                         if (userName.equals("")) {
                             System.out.println(parseCode(4) + " User not logged in");
                             break;
@@ -680,7 +680,7 @@ public class Cli {
 
                         break;
 
-                    case "sendmsg":
+                    case "sendmsg": // SEND-MESSAGE
                         if (userName.equals("")) {
                             System.out.println(parseCode(4) + " User not logged in");
                             break;
