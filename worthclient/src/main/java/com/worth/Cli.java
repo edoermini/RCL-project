@@ -100,7 +100,6 @@ public class Cli {
         int respCode;
 
         this.printLogo();
-        System.out.println();
         System.out.println(ANSI_YELLOW + "Type help to see available commands" + ANSI_RESET);
 
         try (
@@ -809,12 +808,14 @@ public class Cli {
     }
 
     private void printLogo() {
+        System.out.println();
         System.out.println("██╗    ██╗ ██████╗ ██████╗ ████████╗██╗  ██╗");
         System.out.println("██║    ██║██╔═══██╗██╔══██╗╚══██╔══╝██║  ██║");
         System.out.println("██║ █╗ ██║██║   ██║██████╔╝   ██║   ███████║");
         System.out.println("██║███╗██║██║   ██║██╔══██╗   ██║   ██╔══██║");
         System.out.println("╚███╔███╔╝╚██████╔╝██║  ██║   ██║   ██║  ██║");
         System.out.println(" ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝");
+        System.out.println();
     }
 
     private String parseCode(int respCode) {
