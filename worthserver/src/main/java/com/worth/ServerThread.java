@@ -32,7 +32,12 @@ import java.util.Map;
 public class ServerThread implements Runnable {
     private final ProjectsManager projects;
     private final UsersManager users;
+
+    // if null the user is not logged in
+    // if not null the user is logged in
+    // and the value is the user's username
     private String userName;
+
     private final Socket socket;
 
 
