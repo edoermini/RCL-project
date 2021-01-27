@@ -95,13 +95,7 @@ public class ServerThread implements Runnable {
 
     private String processRequest(String command) throws JsonProcessingException {
         String[] splittedCommand = command.split("%");
-        int op;
-
-        try {
-            op = Integer.parseInt(splittedCommand[0]);
-        } catch (NumberFormatException e) {
-            return "1%Unknown operation";
-        }
+        int op = Integer.parseInt(splittedCommand[0]);
 
         switch (op) {
 
