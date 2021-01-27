@@ -10,7 +10,7 @@ public class Chat implements Runnable {
     private final Vector<String> messages;
     private final int port = 6662;
     private MulticastSocket ms;
-    private Boolean deleted = false;
+    private Boolean stopped = false;
 
     public Chat(String chatIp) {
         this.chatIp = chatIp;
@@ -24,10 +24,16 @@ public class Chat implements Runnable {
         }
     }
 
+    /**
+     * This code is run by a thread.
+     * Reads new incoming messages from the multicast group
+     * and saves them in a list for an asynchronous read.
+     */
     @Override
     public void run() {
         InetSocketAddress dategroup = new InetSocketAddress(chatIp, port);
 
+        // joining multicast group for receiving messages
         try {
             this.ms.joinGroup(dategroup, NetworkInterface.getByName("127.0.0.1"));
         } catch (IOException e) {
@@ -35,6 +41,7 @@ public class Chat implements Runnable {
             return;
         }
 
+        // the socket timeout is used to check if this thread should be stopped
         try {
             this.ms.setSoTimeout(5000);
         } catch (SocketException e) {
@@ -44,36 +51,61 @@ public class Chat implements Runnable {
         byte[] buf;
 
         try {
-            while(!deleted) {
+            while(!stopped) {
                 buf = new byte[1024*1024];
 
                 DatagramPacket dp = new DatagramPacket(buf, buf.length);
 
                 try {
+                    // receiving message
                     this.ms.receive(dp);
                 } catch (SocketTimeoutException e) {
+                    // checking if stopped
                     continue;
                 }
 
                 String s = new String(dp.getData()).trim();
+
+                // saving received message
                 messages.add(s);
             }
         } catch (IOException e) {
-            System.out.println("reader");
-            ms.close();
+            e.printStackTrace();
+        } finally {
+
+            if (ms != null) {
+                try {
+                    ms.leaveGroup(dategroup, NetworkInterface.getByName("127.0.0.1"));
+                    ms.close();
+                } catch (IOException e) {
+                 e.printStackTrace();
+                }
+            }
         }
     }
 
+    /**
+     * Stops running messages reader thread
+     */
     public void stop() {
-        this.deleted = true;
+        this.stopped = true;
     }
 
+    /**
+     * Returns true if messages reader thread is stopped, false otherwise
+     * @return true if messages reader thread is stopped, false otherwise
+     */
     public Boolean isDeleted() {
-        return this.deleted;
+        return this.stopped;
     }
 
+    /**
+     * Returns the messages received and not read from last reading
+     * @return the messages received and not read from last reading
+     */
     public List<String> getMessages() {
         List<String> retVal;
+
 
         synchronized (this.messages) {
             retVal = new Vector<>(this.messages);
@@ -83,6 +115,11 @@ public class Chat implements Runnable {
         return retVal;
     }
 
+    /**
+     * Sends a message in multicast group
+     * @param fromUser user that sends teh message
+     * @param message the message to send
+     */
     public void sendChatMsg(String fromUser, String message) {
 
         InetAddress ia = null;

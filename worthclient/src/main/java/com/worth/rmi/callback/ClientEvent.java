@@ -4,12 +4,13 @@ import com.worth.chat.Chat;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 public class ClientEvent extends RemoteObject implements ClientEventInterface {
     private ConcurrentHashMap<String, Boolean> usersList;
-    private ConcurrentHashMap<String, Chat> chats;
+    private final HashMap<String, Chat> chats;
     private ExecutorService threadPool;
 
     /**
@@ -21,7 +22,7 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
      */
     public ClientEvent(
             ConcurrentHashMap<String, Boolean> userList, // shared object
-            ConcurrentHashMap<String, Chat> chats, // shared object
+            HashMap<String, Chat> chats, // shared object
             ExecutorService threadPool) // shared object
     {
         this.usersList = userList;
@@ -38,11 +39,12 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
      */
     @Override
     public void notifyProjectIp(String projectName, String ip) throws RemoteException {
+        synchronized (this.chats) {
+            Chat cr = new Chat(ip);
 
-        Chat cr = new Chat(ip);
-
-        this.chats.put(projectName, cr);
-        this.threadPool.execute(cr);
+            this.chats.put(projectName, cr);
+            this.threadPool.execute(cr);
+        }
     }
 
     /**
@@ -53,8 +55,10 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
      */
     @Override
     public void notifyDeletedProject(String projectName) throws RemoteException {
-        Chat chat = this.chats.get(projectName);
-        chat.stop();
+        synchronized (this.chats) {
+            Chat chat = this.chats.get(projectName);
+            chat.stop();
+        }
     }
 
     /**
@@ -66,6 +70,9 @@ public class ClientEvent extends RemoteObject implements ClientEventInterface {
      */
     @Override
     public void notifyUserEvent(String userName, boolean status) throws RemoteException {
+        // atomically replaces old value mapped
+        // with given username with the new value
+        // or adds a new mapping if given user is a new user
         this.usersList.put(userName, status);
     }
 }

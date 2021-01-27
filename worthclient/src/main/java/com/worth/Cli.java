@@ -38,7 +38,7 @@ public class Cli {
     // contains relations (projects, chat)
     // used to send and read messages from projects chats
     // callback functions adds new relations in this data structure
-    private final ConcurrentHashMap<String, Chat> chats;
+    private final HashMap<String, Chat> chats;
 
     // thread pool for chat readers threads
     // used by callback function to add or stop threads
@@ -56,7 +56,7 @@ public class Cli {
         this.servicePort = servicePort;
 
         this.usersList = new ConcurrentHashMap<>();
-        this.chats = new ConcurrentHashMap<>();
+        this.chats = new HashMap<>();
         this.threadPool = Executors.newCachedThreadPool();
 
         // getting rmi registry
@@ -67,7 +67,7 @@ public class Cli {
             e.printStackTrace();
         }
 
-        // setting registration stub
+        // getting server registration stub
         try {
             this.registration = (Registration) reg.lookup("REGISTRATION-SERVICE");
         } catch (RemoteException | NotBoundException e) {
@@ -145,9 +145,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -169,11 +169,11 @@ public class Cli {
 
 
                             for (Map.Entry<String, String> project : projectsChatIPs.entrySet()) {
-                                Chat cr = new Chat(project.getValue());
-                                this.threadPool.execute(cr);
+                                Chat chat = new Chat(project.getValue());
+                                this.threadPool.execute(chat);
 
-                                // adding project -> chatReader mappings
-                                this.chats.put(project.getKey(), cr);
+                                // adding project -> chat mappings
+                                this.chats.put(project.getKey(), chat);
                             }
 
                             // saving users and status
@@ -205,9 +205,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -252,9 +252,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -300,9 +300,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -336,9 +336,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -373,9 +373,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -419,9 +419,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -465,9 +465,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -481,9 +481,9 @@ public class Cli {
                         if (respCode == 0) {
                             // success
 
-                            System.out.println("Card's name: " + response[1]);
-                            System.out.println("Card's description: " + response[2]);
-                            System.out.println("Card's list: " + response[3]);
+                            System.out.println(ANSI_GREEN + "NAME: " + ANSI_RESET + response[1]);
+                            System.out.println(ANSI_GREEN + "DESC: " + ANSI_RESET + response[2]);
+                            System.out.println(ANSI_GREEN + "LIST: " + ANSI_RESET + response[3]);
                         } else {
                             System.out.println(parseCode(respCode) + " " + response[1]);
                         }
@@ -508,16 +508,16 @@ public class Cli {
                         }
 
                         // sending request
-                        out.println("8%" + splitted[1] + "%" + splitted[2] + "%" + desc);
+                        out.println("8%" + splitted[1] + "%" + splitted[2] + "%" + desc.toString().trim());
                         out.flush();
 
                         // reading response
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -552,9 +552,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -588,9 +588,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -626,7 +626,7 @@ public class Cli {
                             break;
                         }
 
-                        System.out.println("Deleting project " + splitted[1] + "...");
+                        System.out.println(ANSI_YELLOW + "INFO: " + ANSI_RESET + "Deleting project " + splitted[1] + "...");
 
                         // sending request
                         out.println("11%" + splitted[1]);
@@ -636,9 +636,9 @@ public class Cli {
                         responseStr = in.readLine();
 
                         if (responseStr == null) {
-                            // server timeout
+                            // server crash
 
-                            timeout(userName);
+                            serverCrash();
                             command = "quit"; // for exiting from while
                             break;
                         }
@@ -842,59 +842,65 @@ public class Cli {
     }
 
     private String sendChatMsg(String projectName, String message, String user) {
-        Chat projChat;
+        Chat chat;
 
-        projChat = chats.get(projectName);
+        synchronized (this.chats) {
+            chat = this.chats.get(projectName);
 
-        // project deleted and all messages read
-        if (projChat == null) {
-            return parseCode(5) + " Project " + projectName + " doesn't exist";
+            // project deleted and all messages read
+            if (chat == null) {
+                return parseCode(5) + " Project " + projectName + " doesn't exist";
+            }
+
+            // prject deleted but there are messages to read
+            if (chat.isDeleted()) {
+                return parseCode(5) + " Project " + projectName + " has been deleted";
+            }
+
+            chat.sendChatMsg(user, message);
         }
-
-        // prject deleted but there are messages to read
-        if (projChat.isDeleted()) {
-            return parseCode(5) + " Project " + projectName + " has been deleted";
-        }
-
-        projChat.sendChatMsg(user, message);
 
         return parseCode(0) + " Message sent correctly";
     }
 
     private List<String> readChat(String projectName) {
-        Chat cr;
+        Chat chat;
         List<String> messages;
 
-        cr = this.chats.get(projectName);
+        synchronized (this.chats) {
+            chat = this.chats.get(projectName);
 
-        if (cr == null) {
-            return null;
-        }
+            if (chat == null) {
+                return null;
+            }
 
-        messages = cr.getMessages();
+            messages = chat.getMessages();
 
-        if (cr.isDeleted()) {
-            this.chats.remove(projectName);
+            // if relative project is deleted no more messages will arrive
+            // so (projectName, chat) mapping will be removed
+            if (chat.isDeleted()) {
+                this.chats.remove(projectName);
+            }
         }
 
         return messages;
     }
 
     private void listUsers() {
-        synchronized (this.usersList) {
-            for (Map.Entry<String, Boolean> user : this.usersList.entrySet()) {
-                System.out.println(user.getKey() + ": "
-                        + (user.getValue() ? ANSI_GREEN + "online" + ANSI_RESET : ANSI_RED + "offline" + ANSI_RESET));
-            }
+
+        // fail-safe iterator will not throw a ConcurrentModificationException
+        for (Map.Entry<String, Boolean> user : this.usersList.entrySet()) {
+            System.out.println(user.getKey() + ": "
+                    + (user.getValue() ? ANSI_GREEN + "online" + ANSI_RESET : ANSI_RED + "offline" + ANSI_RESET));
         }
     }
 
     private void listOnlineUsers() {
-        synchronized (this.usersList) {
-            for (Map.Entry<String, Boolean> user : this.usersList.entrySet()) {
-                if (user.getValue()) {
-                    System.out.println(user.getKey());
-                }
+
+        // fail-safe iterator will not throw a ConcurrentModificationException
+        for (Map.Entry<String, Boolean> user : this.usersList.entrySet()) {
+            if (user.getValue()) {
+                System.out.println(user.getKey());
             }
         }
     }
@@ -908,17 +914,9 @@ public class Cli {
         return parseCode(respCode) + " " + response[1];
     }
 
-    private void timeout(String userName) {
+    private void serverCrash() {
         System.out.println();
-        System.out.println(ANSI_RED + "Server timeout occurred" + ANSI_RESET);
-
-        if (!userName.equals("")) {
-            try {
-                this.callback.unregisterForEvents(userName);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.println(ANSI_RED + "Server crash occurred" + ANSI_RESET);
 
         // stopping chat readers threads
         for (Chat chat : this.chats.values()) {
