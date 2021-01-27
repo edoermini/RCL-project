@@ -6,7 +6,7 @@ import com.worth.utils.Security;
 /**
  * User implements a user registered to worth.
  */
-@JsonIgnoreProperties({"status"})
+@JsonIgnoreProperties({"status", "online"})
 public class User {
     private String userName;
     private String password;
@@ -54,7 +54,7 @@ public class User {
      *
      * @return true if this user is online, false otherwise
      */
-    public boolean getStatus() {
+    public boolean isOnline() {
         return this.status;
     }
 

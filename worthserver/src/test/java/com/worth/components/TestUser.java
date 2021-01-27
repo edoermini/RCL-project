@@ -4,7 +4,6 @@ import com.worth.utils.Security;
 import org.junit.jupiter.api.Test;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import static org.junit.Assert.*;
 
@@ -38,7 +37,7 @@ public class TestUser {
 
         User u = new User(username, password);
 
-        assertFalse(u.getStatus());
+        assertFalse(u.isOnline());
     }
 
     @Test
@@ -49,7 +48,7 @@ public class TestUser {
         User u = new User(username, password);
         u.setStatus(true);
 
-        assertTrue(u.getStatus());
+        assertTrue(u.isOnline());
     }
 
     @Test

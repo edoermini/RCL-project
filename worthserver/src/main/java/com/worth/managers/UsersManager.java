@@ -14,17 +14,15 @@ import java.util.List;
 import java.util.Map;
 
 public class UsersManager {
-    private final HashMap<String, User> onlineUsers;
-    private final HashMap<String, User> offlineUsers;
+    private final HashMap<String, User> users;
     private final CallbackServer callback;
 
     public UsersManager(List<User> users, CallbackServer callback) {
 
-        this.onlineUsers = new HashMap<>();
-        this.offlineUsers = new HashMap<>();
+        this.users = new HashMap<>();
 
         for (User u : users) {
-            this.offlineUsers.put(u.getUserName(), u);
+            this.users.put(u.getUserName(), u);
         }
 
         this.callback = callback;
@@ -42,22 +40,22 @@ public class UsersManager {
     public synchronized void login(String userName, String password)
             throws UserAlreadyLoggedInException, UserNotFoundException, WrongPasswordException {
 
-        if (this.onlineUsers.containsKey(userName)) {
-            throw new UserAlreadyLoggedInException("User " + userName + " is already logged in");
-        }
-
-        if (!this.offlineUsers.containsKey(userName)) {
+        if (!this.users.containsKey(userName)) {
             throw new UserNotFoundException("User " + userName + " is not registered");
         }
 
-        if (!this.offlineUsers.get(userName).checkPassword(password)) {
+        User u = this.users.get(userName);
+
+        if (u.isOnline()) {
+            throw new UserAlreadyLoggedInException("User " + userName + " is already logged in");
+        }
+
+        if (!u.checkPassword(password)) {
             throw new WrongPasswordException("Wrong password");
         }
 
-        // returns the reference to object mapped with userName key
-        User u = this.offlineUsers.remove(userName);
+        // setting user status to online
         u.setStatus(true);
-        this.onlineUsers.put(u.getUserName(), u);
 
         // notifying new user state
         this.callback.newUserStateEvent(userName, true);
@@ -72,18 +70,18 @@ public class UsersManager {
      */
     public synchronized void logout(String userName) throws UserAlreadyLoggedOutException, UserNotFoundException {
 
-        if (this.offlineUsers.containsKey(userName)) {
-            throw new UserAlreadyLoggedOutException("User " + userName + " is already logged out");
-        }
-
-        if (!this.onlineUsers.containsKey(userName)) {
+        if (!this.users.containsKey(userName)) {
             throw new UserNotFoundException("User " + userName + " doesn't exists");
         }
 
-        // returns the reference to object mapped with userName key
-        User u = this.onlineUsers.remove(userName);
+        User u = this.users.get(userName);
+
+        if (!u.isOnline()) {
+            throw new UserAlreadyLoggedOutException("User " + userName + " is already logged out");
+        }
+
+        // setting user status to offline
         u.setStatus(false);
-        this.offlineUsers.put(u.getUserName(), u);
 
         // notifying new user state
         this.callback.newUserStateEvent(userName, false);
@@ -98,16 +96,12 @@ public class UsersManager {
      */
     public synchronized void register(String userName, String password) throws UserAlreadyExistsException {
 
-        if (this.offlineUsers.containsKey(userName)) {
-            throw new UserAlreadyExistsException("User with username " + userName + " already exists");
-        }
-
-        if (this.onlineUsers.containsKey(userName)) {
+        if (this.users.containsKey(userName)) {
             throw new UserAlreadyExistsException("User with username " + userName + " already exists");
         }
 
         User u = new User(userName, password);
-        this.offlineUsers.put(userName, u);
+        this.users.put(userName, u);
 
         // notifying new user state
         this.callback.newUserStateEvent(userName, false);
@@ -124,12 +118,8 @@ public class UsersManager {
     public synchronized Map<String, Boolean> getUsersList() {
         HashMap<String, Boolean> map = new HashMap<>();
 
-        for (User u : this.onlineUsers.values()) {
-            map.put(u.getUserName(), true);
-        }
-
-        for (User u : this.offlineUsers.values()) {
-            map.put(u.getUserName(), false);
+        for (User u : this.users.values()) {
+            map.put(u.getUserName(), u.isOnline());
         }
 
         return map;
@@ -142,7 +132,7 @@ public class UsersManager {
      * @return true if a user with given username exists, false otherwise
      */
     public synchronized boolean exists(String userName) {
-        return this.onlineUsers.containsKey(userName) || this.offlineUsers.containsKey(userName);
+        return this.users.containsKey(userName);
     }
 
 }

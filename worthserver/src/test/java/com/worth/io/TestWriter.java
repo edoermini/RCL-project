@@ -144,7 +144,7 @@ public class TestWriter {
         User u2 = new ObjectMapper().readValue(new File("db/users/test"), User.class);
 
         assertEquals(u.getUserName(), u2.getUserName());
-        assertEquals(u.getStatus(), u2.getStatus());
+        assertEquals(u.isOnline(), u2.isOnline());
         assertEquals(u.getPassword(), u2.getPassword());
     }
 

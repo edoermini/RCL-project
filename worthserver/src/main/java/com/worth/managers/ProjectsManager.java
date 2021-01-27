@@ -44,25 +44,24 @@ public class ProjectsManager {
      */
     public synchronized void createProject(String projectName, String user) throws ProjectAlreadyExistsException {
 
-        String ip = generateIP();
+        String ip = this.generateIP();
         Project p = new Project(projectName, ip);
 
         try {
             p.addMember(user);
         } catch (UserAlreadyMemberException e) {
-            // if user is already a member project already exists,
-            // so ProjectAlreadyExistsException exception will be thrown
+            // impossible to arrive in this block
         }
 
-        this.usedIPs.add(ip);
-
         /*
-         * putIfAbsent returns null if there was no mapping for the key,
-         * the value associated to the key if there was a mapping
+         * putIfAbsent returns null if there is no mapping for the key or
+         * the value associated to the key if there is a mapping
          */
         if (this.projects.putIfAbsent(projectName, p) != null) {
             throw new ProjectAlreadyExistsException("Project " + projectName + " already exists");
         }
+
+        this.usedIPs.add(ip);
 
         // notifies to the user the project's ip
         this.callback.notifyProjectIp(user, p.getName(), p.getChatIp());
@@ -104,10 +103,10 @@ public class ProjectsManager {
         // removing project from filesystem
         Writer.delProject(p);
 
-        // sending message to into project's multicast chat
+        // sending message into project's multicast chat
         this.sendMsg(user, "deleted project", p.getChatIp());
 
-        // notifies to the user the project's ip
+        // notifies to the project's members the project's ip
         this.callback.notifyDeletedProject(p.getMembers(), p.getName());
     }
 
@@ -141,7 +140,7 @@ public class ProjectsManager {
         try {
             Writer.updateCard(p, p.getCard(cardName));
         } catch (CardNotFoundException e) {
-            e.printStackTrace();
+            // impossible to arrive in this block
         }
 
         // sending message to into project's multicast chat
@@ -239,7 +238,7 @@ public class ProjectsManager {
             e.printStackTrace();
         }
 
-        // sending message to into project's multicast chat
+        // sending message into project's multicast chat
         this.sendMsg(user, "moved card " + cardName + " into " + dst, p.getChatIp());
 
     }
