@@ -31,6 +31,7 @@ public class ProjectsManager {
 
         for (Project p : projects) {
             this.projects.put(p.getName(), p);
+            this.usedIPs.add(p.getChatIp());
         }
     }
 
@@ -363,12 +364,9 @@ public class ProjectsManager {
         InetAddress ia = null;
         MulticastSocket ms;
 
-        InetSocketAddress dategroup = new InetSocketAddress(chatIp, 6662);
-
         try {
             ms = new MulticastSocket(6662);
             ms.setReuseAddress(true);
-            ms.joinGroup(dategroup, NetworkInterface.getByName("127.0.0.1"));
         } catch (IOException e) {
             e.printStackTrace();
             return;
