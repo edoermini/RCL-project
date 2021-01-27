@@ -57,7 +57,7 @@
 		
 		\hfill
 		\begin{minipage}[t]{0.47\textwidth}\raggedright
-			{\large{\bf Professori: \\ Laura Ricci\\ Andrea Michienzi }}
+			{\large{\bf Docenti: \\ Laura Ricci\\ \vspace{2mm} Andrea Michienzi }}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[t]{0.47\textwidth}\raggedleft
@@ -187,7 +187,7 @@
 	
 	\section{Gestione dei thread}
 	Lato server vengono avviati tanti threads quanti sono i client che si collegano, lato client vengono avviati tanti threads quanti sono i progetti dei quali quel determinato utente è membro.
-	In entrambi i casi viene utilizzata una threadpool in particolare viene creata una chached threadpool dato che il numero di clients per il server e di progetti per i clients è variabile.
+	In entrambi i casi viene utilizzata una threadpool in particolare viene creata una cached threadpool dato che il numero di clients per il server e di progetti per i clients è variabile.
 	
 	\section{Thread safeness}
 	È stato deciso di utilizzare il meccanismo dei monitor e alcune strutture concorrenti ove possibile per garantire semplicità nel codice e soprattutto perché non è stato possibile utilizzare lock esplicite e quindi sincronizzare i thread con una granularità più fine.
