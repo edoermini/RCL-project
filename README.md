@@ -1,6 +1,5 @@
-![image](report/unipi_logo.png){width="90%"}
+![image](report/unipi_logo.png)
 
-\
 \
 
 Scelte progettuali
@@ -165,7 +164,7 @@ rimozione del progetto stesso.
 Schema dell'architettura
 ------------------------
 
-![image](report/project-architecture.png){width="100%"}
+![image](report/project-architecture.png)
 
 Scelte implementative
 =====================
