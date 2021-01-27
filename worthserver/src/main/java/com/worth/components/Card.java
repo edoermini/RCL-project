@@ -2,15 +2,15 @@ package com.worth.components;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 @JsonIgnoreProperties({"state"})
 public class Card {
 
     private String name;
     private String description;
-    private Vector<CardState> history;
+    private ArrayList<CardState> history;
 
     /**
      * Creates a card with given name and description
@@ -21,26 +21,13 @@ public class Card {
     public Card(String name, String description) {
         this.name = name;
         this.description = description;
-        this.history = new Vector<>();
-
-        this.history.add(CardState.TODO);
-    }
-
-    /**
-     * Creates a card with given name and void description
-     *
-     * @param name the card's name
-     */
-    public Card(String name) {
-        this.name = name;
-        this.description = "";
-        this.history = new Vector<>();
+        this.history = new ArrayList<>();
 
         this.history.add(CardState.TODO);
     }
 
     public Card() {
-        this.history = new Vector<>();
+        this.history = new ArrayList<>();
     }
 
     /**
@@ -51,7 +38,7 @@ public class Card {
     public Card(Card c) {
         this.name = c.name;
         this.description = c.description;
-        this.history = new Vector<>(c.history);
+        this.history = new ArrayList<>(c.history);
     }
 
     /**
@@ -78,7 +65,7 @@ public class Card {
      * @return the card's sates history
      */
     public List<CardState> getHistory() {
-        return new Vector<>(this.history);
+        return new ArrayList<>(this.history);
     }
 
     /**
@@ -104,8 +91,8 @@ public class Card {
      *
      * @param history the history
      */
-    public void setHistory(Vector<CardState> history) {
-        this.history = new Vector<>(history);
+    public void setHistory(List<CardState> history) {
+        this.history = new ArrayList<>(history);
     }
 
     /**
