@@ -31,7 +31,7 @@ public class TestUser {
     }
 
     @Test
-    public void testGetStatus() {
+    public void testIsOnline() {
         String username = "test";
         String password = "test";
 
