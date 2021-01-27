@@ -41,18 +41,16 @@ public class Chat implements Runnable {
             return;
         }
 
-        // the socket timeout is used to check if this thread should be stopped
+        // the socket timeout is used to check if this thread has been stopped
         try {
             this.ms.setSoTimeout(5000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
 
-        byte[] buf;
-
         try {
             while(!stopped) {
-                buf = new byte[1024*1024];
+                byte[] buf = new byte[1024*1024];
 
                 DatagramPacket dp = new DatagramPacket(buf, buf.length);
 
