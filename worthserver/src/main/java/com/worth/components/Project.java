@@ -192,7 +192,7 @@ public class Project {
         CardState state = this.getCardState(cardName);
 
         if (state == null) {
-            throw new CardNotFoundException("Card " + cardName + "doesn't exist in project " + this.name);
+            throw new CardNotFoundException("Card " + cardName + " doesn't exist in project " + this.name);
         }
 
 
