@@ -63,6 +63,7 @@ public class ServerMain {
 
         ExecutorService threadPool = Executors.newCachedThreadPool();
 
+        System.out.println("[INFO]: Listening for incoming connections...");
         // dispatching new incoming connections
         while (true) {
             Socket sock = ssock.accept();

@@ -22,8 +22,6 @@ import com.worth.managers.UsersManager;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,20 +44,12 @@ public class ServerThread implements Runnable {
         this.users = users;
         this.socket = socket;
         this.userName = null;
-
-        try {
-            // 5 minutes of timeout
-            // if the client is inactive for more than
-            // 5 minutes the connection will be closed
-            // and user will be logged out
-            this.socket.setSoTimeout(5 * 60 * 1000);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     public void run() {
+
+        System.out.println("[INFO]: Connected to " + this.socket.getInetAddress() + ":" + this.socket.getPort());
 
         try (
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -70,21 +60,11 @@ public class ServerThread implements Runnable {
 
             while(true) {
 
-                try {
-                    command = inFromClient.readLine();
-                } catch (SocketTimeoutException e) {
-                    // passed 5 minutes waiting for user input
-                    // closing safely
-
-                    if (userName != null) {
-                        this.users.logout(userName);
-                    }
-
-                    break;
-                }
+                command = inFromClient.readLine();
 
                 // client crashed
                 if (command == null) {
+                    System.out.println("[WARN]: Client " + this.socket.getInetAddress() + ":" + this.socket.getPort() + " crashed");
 
                     // closing safely
                     if (userName != null) {
@@ -100,12 +80,13 @@ public class ServerThread implements Runnable {
                 }
 
                 String response = processRequest(command);
-                System.out.println(response);
                 outToClient.println(response);
                 outToClient.flush();
             }
 
             this.socket.close();
+
+            System.out.println("[INFO]: Connection to " + this.socket.getInetAddress() + ":" + this.socket.getPort() + " closed");
 
         } catch (IOException | UserAlreadyLoggedOutException | UserNotFoundException e) {
             e.printStackTrace();
@@ -162,9 +143,9 @@ public class ServerThread implements Runnable {
                             splittedCommand[1]); // user's username
                     this.userName = null;
                 } catch (UserNotFoundException e) {
-                    return "2%" + e.getMessage();
+                    // not possible, client saves the correct user's username
                 } catch (UserAlreadyLoggedOutException e) {
-                    return "4%" + e.getMessage();
+                    // not possible, check made by client
                 }
 
                 return "0%Logged out successfully";
