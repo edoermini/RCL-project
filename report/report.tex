@@ -194,7 +194,7 @@
 	
 	\subsection{Lato server}
 	Utilizzando un multithreaded server, per garantire una consistenza delle informazioni create, modificate e rimosse dai client, è stato necessario rendere l'accesso agli utenti e ai progetti, quindi anche alle card e ai membri dei quest'ultimi mutualmente esclusivo.\\
-	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che vanno a modificare lo stato che per la prima sono le liste degli utenti online e offline e per la seconda è la lista dei progetti.\\
+	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che vanno a modificare lo stato che per la prima è la lista degli utenti e per la seconda è la lista dei progetti.\\
 	Non è stato possibile garantire una mutua esclusione a grana più fine, utilizzando per esempio strutture concorrenti come \textbf{ConcurrentHashMap}, dato che tutti i metodi fanno diversi controlli prima di eseguire l'operazione richiesta e dal momento in cui la chiamata di due o più metodi thread-safe di una stessa struttura non garantisce più la thread-safeness della stessa è stato scelto di utilizzare strutture non concorrenti e renderle thread-safe esplicitamente.
 	
 	\subsection{Lato client}
@@ -357,19 +357,27 @@
 	
 	\section{Run}
 	Per compilare e avviare il server posizionarsi all'interno della directory \textit{worthserver} e digitare sul terminale:
-	\begin{lstlisting}[language=bash]
-	mvn compile
-	mvn exec:java -Dexec.mainClass="com.worth.ServerMain"
+	\begin{lstlisting}
+	$ mvn compile
+	$ mvn exec:java -Dexec.mainClass="com.worth.ServerMain"
+	\end{lstlisting}
+	Se il server viene avviato correttamente allora verrà stampata a schermo la stringa
+	\begin{lstlisting}
+	[INFO]: Listening for incoming connections...
 	\end{lstlisting}
 	
 	Una volta avviato il server per avviare un client aprire un nuovo terminale, posizionarsi all'interno della directory \textit{worthclient} e digitare:
-	\begin{lstlisting}[language=bash]
-	mvn compile
-	mvn exec:java -Dexec.mainClass="com.worth.WorthMain"
+	\begin{lstlisting}
+	$ mvn compile
+	$ mvn exec:java -Dexec.mainClass="com.worth.WorthMain"
 	\end{lstlisting}
+	Dopo aver avviato il client si avrà di fronte il prompt di worth:
+	\begin{lstlisting}
+	worth$
+	\end{lstlisting}
+	dal quale sarà possibile chiamare tutti i comandi del sistema, consultabili digitando il comando \textit{help}.\\
 	
-	Si consiglia di non copiare e incollare dal documento ma di scrivere a mano i comandi perché in base al lettore di pdf che si usa i caratteri copiati potrebbero essere errati e dare quindi errori di compilazione.\\
-	Una volta avviato il client per vedere la lista dei comandi disponbili digitare il comando \textit{help}.
+	Si consiglia di non copiare e incollare dal documento ma di scrivere a mano i comandi perché in base al lettore di pdf che si usa i caratteri copiati potrebbero essere errati e dare quindi errori di compilazione e/o di esecuzione.\\
 	
 	\section{Esempio di interazione con il client}
 	\begin{lstlisting}
