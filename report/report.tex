@@ -57,7 +57,7 @@
 		
 		\hfill
 		\begin{minipage}[t]{0.47\textwidth}\raggedright
-			{\large{\bf Professoressa: \\ Laura Ricci\\ }}
+			{\large{\bf Professori: \\ Laura Ricci\\ Andrea Michienzi }}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[t]{0.47\textwidth}\raggedleft
@@ -76,7 +76,7 @@
 		Le componenti base del sistema sono:
 		
 		\begin{itemize}
-			\item \textbf{Card} rappresenta una card appunto
+			\item \textbf{Card} rappresenta una card
 			
 			\item \textbf{Project} rappresenta un progetto, contiene le card e i membri relativi al progetto
 			
@@ -89,14 +89,14 @@
 			\item \textbf{ProjectsManager} mantiene la lista di tutti i progetti, permette l'aggiunta, la modifica e la cancellazione di quest'ultimi.\\
 			Utilizza le funzioni di rmi callback definite nell'iterfaccia \textbf{CallbackServer} per notificare agli utenti:
 			\begin{itemize}
-				\item[1] I nuovi progetti dei quali sono membri
-				\item[2] I progetti eliminati e dei quali erano membri
+				\item[1.] I nuovi progetti dei quali sono membri
+				\item[2.] I progetti eliminati e dei quali erano membri
 			\end{itemize}
-			Utilizza i metodi statici della classe \textbf{Writer} per rendere persistente lo stato del sistema.
 			
 			\item \textbf{UsersManager} mantiene la lista degli utenti, permette la registrazione il login e il logout di quest'ultimi.\\
 			Utilizza, come sopra, le funzioni di rmi callback per notificare agli utenti il cambio dello stato di un utente (online/offline).\\
-			Utilizza i metodi statici della classe \textbf{Writer} per rendere persistente lo stato del sistema.
+			
+			Sia \textbf{UsersManager} che \textbf{ProjectsManager} utilizzano i metodi statici della classe \textbf{Writer} per rendere persistente lo stato del sistema.
 			
 		\end{itemize}
 	
@@ -104,8 +104,8 @@
 	Le componenti principali lato client sono 2:
 	
 	\begin{itemize}
-		\item \textbf{Cli} definita in \textit{com.worth}, avvia la connessione TCP con il server e gestisce la comunicazione con il server.\\
-		Mantiene le strutture dati modificate dalle funzioni di rmi callback chiamate dal server.
+		\item \textbf{Cli} definita in \textit{com.worth}, avvia la connessione TCP e gestisce la comunicazione con il server.\\
+		Mantiene le strutture dati modificate dalle funzioni di rmi callback implementate in \textbf{ClientEvent} e chiamate dal server.
 		
 		\item \textbf{Chat} definita in \textit{com.worth.chat} è un thread avviato per ogni progetto dell'utente e contiene i metodi per leggere e scrivere da/sulla chat.
 	\end{itemize}
@@ -139,13 +139,13 @@
 			\item notifyDeletedProject(String projectName)
 		\end{itemize}
 
-	Il primo serve per notificare agli utenti membri del progetto l'ip di quest'ultimo, il secondo per notificare invece sempre agli stessi la cancellazione di un progetto del quale erano membri, questo per permettere di eliminare lato client le risorse allocate per leggere la chat di quel progetto.\\
+	Il primo serve per notificare agli utenti membri di un nuovo progetto l'ip di quest'ultimo, il secondo per notificare invece sempre agli stessi la cancellazione di un progetto del quale erano membri, questo per permettere di eliminare lato client le risorse allocate per leggere la chat di quel progetto.\\
 	L'unico momento in cui il client viene a conoscenza degli ip dei vari progetti senza il meccanismo di callback è al login dove, se l'operazione è avvenuta con successo, vengono inviati insieme alla lista degli utenti come risposta sulla connessione TCP avviata dal client.\\
 	La scelta di utilizzare questo metodo è motivata dal fatto che la notifica di aggiunta e/o di cancellazione dei progetti è quasi istantanea e permette al client di essere sempre aggiornato su azioni di altri su progetti di cui è membro. \\
-	In più evita all'utente di avviare esplicitamente la lettura di nuovi messaggi dalle chat dei progetti di cui è membro infatti tutto questo viene fatto automaticamente nell'implementazione lato client dell'interfaccia \textbf{ClientEventInterface}.
+	In più evita all'utente di avviare esplicitamente la lettura di nuovi messaggi dalle chat dei progetti di cui è membro infatti tutto questo viene fatto automaticamente al momento del login e per tutto il tempo che l'utente è loggato nell'implementazione lato client dell'interfaccia \textbf{ClientEventInterface}.
 	
 	\subsection{Lato client}
-	\textbf{Chat} viene utilizzata per avviare un thread che in background legge e salva i messaggi che arrivano per un determinato progetto, contiene in oltre 2 metodi: uno per leggere i messaggi arrivati dall'ultima lettura e uno per inviare un messaggio in chat. \\
+	\textbf{Chat} viene utilizzata per avviare un thread che in background legge e salva i messaggi che arrivano per un determinato progetto, contiene in oltre 2 metodi: uno per leggere i messaggi arrivati dopo l'ultima lettura e uno per inviare un messaggio in chat. \\
 	Il metodo di callback \textit{notifyProjectIp} crea un instanza Chat per ogni nuovo progetto e avvia il thread che legge i messaggi per quel progetto, il metodo \textit{notifyDeletedProject} invece termina il thread avviato per un progetto eliminato e quindi stoppa il salvataggio di nuovi messaggi.
 	
 	\subsubsection{Eliminazione di un progetto}
@@ -154,10 +154,6 @@
 	
 	\subsection{Lato server}
 	L'unica cosa che fa il server sulle chat dei vari progetti è inviare messaggi di notifica ai membri di un progetto al quale è stata fatta una modifica, come aggiunta di cards o membri, spostamento di cards e/o rimozione del progetto stesso.
-	
-	\section{Server timeout}
-	Per evitare uno spreco di risorse è stato previsto un tempo massimo di attesa del server per un input da parte dell'utente impostato a 5 minuti. \\
-	Se un utente non interagisce con il server per più di 5 minuti il server fa il logout dell'utente e chiude la communicazione con il client, a questo punto il client rimane in attesa di un input da parte dell'utente e non appena questo avviene si chiude stampando un messaggio di timeout. \\
 	
 	\section{Schema dell'architettura}
 	\begin{center}
@@ -169,17 +165,18 @@
 	È stato scelto di rappresentare quasi tutte le liste con la struttura dati \textbf{HashMap} o la versione concorrente \textbf{ConcurrentHashMap} per rendere efficiente aggiunta, ricerca e rimozione di informazioni dato che vengono eseguite con complessità pari a $\Theta(1)$.\\
 	
 	\subsection{Lato server}
-	Per le 4 liste delle card, per la lista dei progetti e degli utenti è stata usata un'\textbf{HashMap} con chiave rispettivamente il nome della card, del progetto o dell'utente e come valore l'oggetto corrispondente. Non c'è stato bisogno di una struttura concorrente perché ogni metodo di \textbf{ProjectsManager} e \textbf{UsersManager} che gestisce queste informazioni prende la lock implicita sull'oggetto prima di eseguire qualsiasi operazione.\\
-	\textbf{ConcurrentHashMap} è stata usata invece per rappresentare gli utenti interessati a ricevere notifiche con callback in \textbf{CallbackServer} dato che i metodi \textit{registerForEvents} e \textit{unregisterForEvents} non fanno altro che eseguire rispettivamente una \textit{put} e una \textit{remove}.
+	Per le 4 liste delle card, per la lista dei progetti e degli utenti è stata usata un'\textbf{HashMap} con chiave rispettivamente il nome della card, del progetto o dell'utente e come valore l'oggetto corrispondente. Non c'è stato bisogno di una struttura concorrente perché ogni metodo di \textbf{ProjectsManager} e \textbf{UsersManager} che gestiscono queste informazioni prende la lock implicita sull'intero oggetto prima di eseguire qualsiasi operazione.\\
+	\textbf{ConcurrentHashMap} è stata usata invece per rappresentare gli utenti interessati a ricevere notifiche con callback in \textbf{CallbackServer} dato che i metodi \textit{registerForEvents} e \textit{unregisterForEvents} non fanno altro che eseguire rispettivamente una \textit{put} e una \textit{remove}.\\
+	Per la lista dei membri di un progetto e per la history di ogni card è stato utilizzato invece un'\textbf{ArrayList}, infatti per la prima l'unica cosa da memorizzare sono gli username dei membri e per la seconda solo gli stati delle card.
 	
 	\subsection{Lato client}
-	È stata usata una \textbf{ConcurrentHashMap} sia per la lista degli oggeti \textbf{Chat} che per la lista degli utenti in quanto vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di callback.\\
+	È stata usata un'\textbf{HashMap} con sincronizzazione esplicita per la lista degli oggetti \textbf{Chat} e una \textbf{ConcurrentHashMap} per la lista degli utenti in quanto vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di callback.\\
 	Per la prima viene usato come chiave il nome del progetto e come valore l'oggetto \textbf{Chat} corrispondente, per la seconda come chiave viene usato il nome dell'utente e come valore un booleano dove true equivale a utente online false il contrario.
 	
 	\section{Porte utilizzate}
 	Per il corretto funzionamento di tutto il servizio sono state utilizzate 3 porte:
 	\begin{itemize}
-		\item 6660 la porta alla quale si connettono i clients
+		\item 6660 la porta alla quale si connettono i clients per instaurare la connessione TCP con il server
 		\item 6661 la porta usata per il registro rmi
 		\item 6662 la porta usata per le chat in multicast
 	\end{itemize}
@@ -189,19 +186,22 @@
 	Questo perché si è preferito mantiene una scalabilità elevata, ritardi di reply e accept generalmente bassi e una semplicità nell'implementazione andando a perdere nell'efficienza nell'I/O non utilizzando java NIO.
 	
 	\section{Gestione dei thread}
-	Lato server vengono avviati tanti threads quanti sono i client che si collegano, lato client vengono avviati tanti threads quanti sono i progetti di cui quel determinato utente è membro.
-	In entrambi i casi viene utilizzata una threadpool in particolare viene creata una chached threadpool dato che il numero di clients per il server e di progetti per il clients è variabile.
+	Lato server vengono avviati tanti threads quanti sono i client che si collegano, lato client vengono avviati tanti threads quanti sono i progetti dei quali quel determinato utente è membro.
+	In entrambi i casi viene utilizzata una threadpool in particolare viene creata una chached threadpool dato che il numero di clients per il server e di progetti per i clients è variabile.
 	
 	\section{Thread safeness}
 	È stato deciso di utilizzare il meccanismo dei monitor e alcune strutture concorrenti ove possibile per garantire semplicità nel codice e soprattutto perché non è stato possibile utilizzare lock esplicite e quindi sincronizzare i thread con una granularità più fine.
 	
 	\subsection{Lato server}
-	Utilizzando un multithreaded server, per gerantire una consistenza delle informazioni create, modificate e rimosse dai client, è stato necessario rendere l'accesso agli utenti e ai progetti, quindi anche alle card e ai membri dei quest'ultimi mutualmente esclusivo.\\
-	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che vanno a modificare lo stato che per la prima sono le liste degli utenti online e offline e per la seconda è la lista dei progetti. 
+	Utilizzando un multithreaded server, per garantire una consistenza delle informazioni create, modificate e rimosse dai client, è stato necessario rendere l'accesso agli utenti e ai progetti, quindi anche alle card e ai membri dei quest'ultimi mutualmente esclusivo.\\
+	Le classi che gestiscono queste informazioni sono \textbf{UsersManager} e \textbf{ProjectsManager} e tutti i metodi di entrambe sono \textit{synchronized} dato che vanno a modificare lo stato che per la prima sono le liste degli utenti online e offline e per la seconda è la lista dei progetti.\\
+	Non è stato possibile garantire una mutua esclusione a grana più fine, utilizzando per esempio strutture concorrenti come \textbf{ConcurrentHashMap}, dato che tutti i metodi fanno diversi controlli prima di eseguire l'operazione richiesta e dal momento in cui la chiamata di due o più metodi thread-safe di una stessa struttura non garantisce più la thread-safeness della stessa è stato scelto di utilizzare strutture non concorrenti e renderle thread-safe esplicitamente.
 	
 	\subsection{Lato client}
 	Le uniche strutture condivise sono \textit{usersList} che mantiene le coppie $<nome utente, stato>$, \textit{chats} che mantiene le coppie $<nome progetto, chat>$ e \textit{threadPool} che mantiene tutti i thread che leggono le chat dei vari progetti dell'utente.\\ 
-	Per le prime due è necessaria una sincronizzazione dato che vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di \textbf{CallbackServer} e per l'ultima no dato che viene modificata solo dai metodi di callback, \textbf{Cli} la modifica solo dopo o prima che il client si è rispettivamente disiscritto o iscritto per le callback dal server.
+	Per le prime due è necessaria una sincronizzazione dato che vengono accedute contemporaneamente da \textbf{Cli} e dai metodi di \textbf{ClientEvent} e per l'ultima no dato che viene modificata solo dai metodi di callback, \textbf{Cli} la modifica solo dopo o prima che il client si è rispettivamente disiscritto o iscritto per le callback dal server.\\
+	Per la prima è stato possibile usare la \textbf{ConcurrentHashMap}, infatti \textit{usersList} è utilizzato in \textbf{ClientEvent} dal metodo \textit{notifyUserEvent} che chiama solamente una \textit{put} e in \textbf{Cli} dai metodi \textit{listUsers} e \textit{listOnlineUsers} che generano un iteratore che ha un comportamento fail-safe.\\
+	Per la seconda invece non è stato possibile utilizzare una \textbf{ConcurrentHashMap} perché il metodo \textit{readChat} in \textbf{Cli} necessita di una sincronizzazione esplicita, infatti anche con una struttura concorrente ci potrebbe essere una race condition tra il controllo della cancellazione del progetto e la rimozione della entry dalla mappa, perciò si è preferito usare una \textbf{HashMap}.\\
 	
 	\section{Generazione degli ip di multicast per le chat}
 	Per permettere la riusabilità degli ip dei progetti eliminati viene utilizzato l'\textbf{ArrayList} \textit{usedIPs} definito dentro \textbf{ProjectsManager} che salva gli ip in uso.
@@ -268,7 +268,7 @@
 	\begin{center}
 		\begin{tabular}{ |c|c|c| } 
 			\hline
-			Codice richiesta & operazione & parametri\\
+			Codice richiesta & Operazione & Parametri\\
 			\hline\hline
 		  	0	& login				& 
 		  		\begin{tabular}{ c|c }
@@ -282,7 +282,7 @@
 			3	& create project	& progetto\\
 			\hline
 			4	& add member		& 
-				\begin{tabular}{ l|r }
+				\begin{tabular}{ c|c }
 					progetto & membro
 				\end{tabular}\\
 			\hline
@@ -291,22 +291,22 @@
 			6	& show cards 		& progetto\\
 			\hline
 			7	& show card 		& 
-				\begin{tabular}{ l|r }
+				\begin{tabular}{ c|c }
 					progetto & card
 				\end{tabular}\\
 			\hline
 			8	& add card			& 
-				\begin{tabular}{ l|c|r }
+				\begin{tabular}{ c|c|c }
 					progetto & card & descrizione
 				\end{tabular}\\
 			\hline
 			9	& move card			& 
-				\begin{tabular}{ l|c|r }
+				\begin{tabular}{ c|c|c }
 					progetto & card & destinazione
 				\end{tabular}\\
 			\hline
 			10	& get card history	& 
-				\begin{tabular}{ l|r }
+				\begin{tabular}{ c|c }
 					progetto & card
 				\end{tabular}\\
 			\hline
@@ -321,7 +321,7 @@
 	\begin{center}
 		\begin{tabular}{ |c|c| } 
 			\hline
-			Codice risposta & significato \\
+			Codice risposta & Significato \\
 			\hline\hline
 			0	& operazione eseguita con successo \\
 			\hline
@@ -342,10 +342,10 @@
 		\end{tabular}
 	\end{center}
 
-	\chapter{Compilazione e Avvio}
+	\chapter{Esecuzione}
 	
 	\section{Dipendenze}
-	L'unica dipendenza necessaria per compilare e runnare server e i clients è maven.\\
+	Il progetto è stato scritto usando la versione 14 dello SDK di java e maven.\\
 	L'installazione di maven varia in base al sistema operativo, per farlo correttamente si può seguire la guida del sito ufficiale andando su  \href{https://maven.apache.org/install.html}{https://maven.apache.org/install.html}.
 	
 	\subsection{Debian based}
@@ -370,6 +370,59 @@
 	
 	Si consiglia di non copiare e incollare dal documento ma di scrivere a mano i comandi perché in base al lettore di pdf che si usa i caratteri copiati potrebbero essere errati e dare quindi errori di compilazione.\\
 	Una volta avviato il client per vedere la lista dei comandi disponbili digitare il comando \textit{help}.
+	
+	\section{Esempio di interazione con il client}
+	\begin{lstlisting}
+	worth$ register test password123
+	SUCCESS: User test successfully registered
+	
+	worth$ login test password123
+	SUCCESS: Logged in successfully
+	
+	test@worth$ createp testproj
+	SUCCESS: Project successfully created
+	
+	test@worth$ addc testproj testcard this is a description
+	SUCCESS: Card successfully added
+	
+	test@worth$ showcs testproj
+	testcard
+	
+	test@worth$ showc testproj testcard
+	NAME: testcard
+	DESC: this is a description
+	LIST: TODO
+	
+	test@worth$ movec testproj testcard inprogress
+	SUCCESS: Card successfully moved
+	
+	test@worth$ sendmsg testproj i'm going to finish testcard
+	SUCCESS: Message sent correctly
+	
+	test@worth$ movec testproj testcard done
+	SUCCESS: Card successfully moved
+	
+	test@worth$ readchat testproj
+	[WORTH]: test added card testcard
+	[WORTH]: test moved card testcard into INPROGRESS
+	[test]: i'm going to finish testcard
+	[WORTH]: test moved card testcard into DONE
+	
+	test@worth$ delp testproj
+	INFO: Deleting project testproj...
+	SUCCESS: project successfully deleted
+	
+	test@worth$ readchat testproj
+	[WORTH]: test deleted project
+	
+	test@worth$ readchat testproj
+	PROJECT ERROR: Project testproj doesn't exist
+	
+	test@worth$ logout
+	SUCCESS: Logged out successfully
+	
+	worth$ quit
+	\end{lstlisting}
 	
 	
 	
