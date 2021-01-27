@@ -1,4 +1,4 @@
-![image](unipi_logo){width="90%"}
+![image](report/unipi_logo){width="90%"}
 
 \
 \
@@ -165,7 +165,7 @@ rimozione del progetto stesso.
 Schema dell'architettura
 ------------------------
 
-![image](project-architecture){width="100%"}
+![image](report/project-architecture){width="100%"}
 
 Scelte implementative
 =====================
