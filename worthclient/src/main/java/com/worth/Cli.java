@@ -119,6 +119,11 @@ public class Cli {
 
                 String cmd = sc.nextLine();
 
+                if (cmd.contains("%")) {
+                    System.out.println(ANSI_RED + "SYNTAX ERROR: " + ANSI_RESET + "Cannot use special character %");
+                    continue;
+                }
+
                 // splitting input
                 String[] splitted = cmd.split(" ");
                 command = splitted[0].trim();
@@ -791,9 +796,9 @@ public class Cli {
 
         System.out.println("Cards commands:");
         System.out.println("- showcs [project]                      shows all project's cards");
-        System.out.println("- showc [project] [card]                shows card information (name, description, list)");
+        System.out.println("- showc [project] [card]                shows card's information (name, description, list)");
         System.out.println("- addc [project] [card] [description]   adds a card to project");
-        System.out.println("- movec [project] [card] [list]         moves card into specified list");
+        System.out.println("- movec [project] [card] [list]         moves the project's card into specified list");
         System.out.println("                                            [list] = todo | inprogress | toberevised | done");
         System.out.println("- getch [project] [card]                prints the card's history");
         System.out.println();
@@ -803,6 +808,7 @@ public class Cli {
         System.out.println("- sendmsg [project] [message]           sends a message into project's chat");
         System.out.println();
 
+        System.out.println("General commands:");
         System.out.println("- quit                                  terminates the client");
         System.out.println("- help                                  prints this message");
     }
