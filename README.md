@@ -1,6 +1,5 @@
 ![image](report/unipi_logo.png)
 
-\
 
 Scelte progettuali
 ==================
